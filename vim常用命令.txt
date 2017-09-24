@@ -1,0 +1,313 @@
+一、操作符 +位移命令
+      dfc                            删除当前行知道下一个出现字符“c”的位置之间的内容
+      dtc                            删除当前行直到下一个字符“c”所出现位置之间的内容
+      D 删除至行尾
+      Y 复制到行尾
+      p P可以使用命令计数 xp 交换两个字符
+      f,F,t,T 这4个命令都可以用";"来重复. 以","也是重复同样的命令, 但是方向与原命令的方向相反.
+      w，e已word为单位的移动 W，E已空格作为分隔符 、j k下上、以及字符搜索命令 都不叫跳转
+      b 向前移动一个word
+      J 两行变一行
+      c 改变 cw 改变一个单词 cc改变一整行 C=c$
+      s =cl 修改一个字符 S =cc
+      r 替换一个字符 4rx 可加命令计数 R 替换模式
+
+      . 重复上一次做得"改动"， 除了"u"命令CTRL-R和以冒号开头的命令
+      %以匹配括号
+
+      V 行模式 CTRL+V 块模式
+
+      ``返回到上个位置
+      
+      zz 将当前行置于屏幕中央，ZZ保存退出=wq
+
+二、操作符+文本对象
+      daw 删除一个单词 diw 不包括空白字符
+      cis 改变一整句（包含句子后面的空格） caw 不包含句子后面的空格
+
+      :set igorecase 忽略大小写查找
+      :set hlsearch  高亮显示搜过结果 nohlsearch 取消高亮
+      marks 标记
+
+      查找（支持正则表达式）
+      1. ^一行开头 $一行结尾
+      2. . 单个字符
+
+三、映射 
+   3.1 :map <F5> i{<Esc>ea}<Esc>  F5给一个单词加上大括号
+   3.2 options  选项设置 
+   3.2.1 :help 'wrap'   查看某个选项
+   3.3 :set list 显示制表符为^I 行尾加$
+   3.4 :set iskeyword 定义一个word包含的字符
+      iskeyword=@,48-57,_,192-255 >   @-所有字母，48-57 数字0-9 192-255
+可打印的拉丁字母
+     :set iskeyword+=- 加上连字符
+     :set iskeyword-=- 减上连字符
+   3.5 :set showcmd 键入的命令会显示在右下角
+  
+四、编辑多个文件
+ 4.1 edit f1 f2 f3 同时编辑多个文件 
+      :args 查看当前编辑的文档 
+      :args one.c tow.c three.c 新增一个文档列表   CRTL-^ 返回上一文档
+      `" 上一次离开文件的位置  `.上一次文件最后修改的位置 
+      `mF 大写标记是全局的，`mf 小写标记是文档内的
+      :marks F 显示标记的位置
+ 4.2 同时在多个文件间复制
+      在一个文件复制，edit anotherfile ，p粘贴即可
+ 4.3 从一个文件同时复制多个块的内容到另一个文件，用寄存器
+     "fyas 复制一个句子到f寄存器  "l3Y 把3行内容放到l寄存器，edit anotherfile
+,"fp 复制f的内容
+     删除内容也可以指定寄存器名  "wdaw 删除一个单词并保存到w寄存器
+     "Fyy 大写向寄存器添加内容
+     w >> logfile 将当前文件内容追加到 logfile 
+     :saveas move.c 另存为不影响源文件 
+ 4.4 替换 [range]substitute/from/to/[flags] 
+     range指定返回 %对所有行 :1,5s/this/that/g 1-5行 单个数字表示指定某个行 
+      . 指定当前行 :.,$s/yes/no/g 当前行到最后一行 :.w otherfile
+只写入当前行到otherfile 
+      :?^Chapter?,/^Chapter/s=grey=gray=g 向前查找，向后查找
+       /Chapter/-1 上一行 +3下三行 或者 :.+3,$-5 这种形式
+      或者 使用标志 :'t,'b
+      visual模式下选中文本后按下":" 出现如下命令：'<,'> 这两个标记会一直保存
+      按下 "5:" ，出现如下命令 :.,.+4
+     flags=g 替换所有匹配项 flags=p 列出每个被修改的行 c确认  
+      支持正则表达式 分割符可以换:s+one/two+one or two+g
+ 4.5 读写部分文件
+     :read patch 编辑一个文件是读入另一文件patch的内容 :$r patch 增加的末尾
+:0r patch 增加到第一行
+     :.,$write tempo 把当前行到最后一行的内容写入tempo >>追加
+ 4.6 改变大小写 
+      gu 大写-》小写 gU 小写->大写 g~ 反转大小写 guu gUU=gUgU g~~ 改变一整行
+ 10.9 使用外部程序
+     !{motion}{program}  
+     !5G 选中5行排序 !! 过滤当前行的内容
+   10.9.2 读取命令输出
+      :read !dir 读取命令输出插入到当前光标下面
+      :0read !date -u
+过滤程序可以有自己的参数，可以知道一个范围告诉vim把输出放哪里
+   10.9.3 将文本写入一个命令，作为命令的参数
+      :write !wc 统计该文本的字数 :write! wc 强制覆盖wc  这里的空白至关重要
+五、灾难恢复
+  
+五、一  寄存器  
+   6.2 宏记录
+     qa 开始将后续的命令记入寄存器a
+     ^ 将光标移动到行首
+     i\#include "<Esc> 在该行之前插入#include "
+     $ 移动到行尾
+     a"<Esc> 在行尾加上"字符
+     j 移到下一行
+     q 停止记录
+    6.2.1 修改寄存器的内容
+       G 到文件最后
+       o<Esc> 生成一个新行
+       "np 将寄存器n的内容置于该行. 你会看
+       到这些命令就象你键入的普通文本一样.
+       {edits} 修改错误的部分. 这与编辑普通文本无异
+       0 到行首
+       "ny$ 将正确的结果回存到寄存器n中
+       dd 删除这行草稿
+ 
+    6.2.2 向寄存器添加内容
+           目前为止我们用到的还都是小写字母的寄存器. 要向寄存器追加内
+       容而不是覆盖它, 使用它的大写形式即可.
+           假设你已经记录了一个改变word的命令在寄存器c中. 它已经可以正
+       常工作, 但你又想让它搜索到下一个word继续编辑. 可以使用下面的命
+       令:
+       qC/word<Enter>q
+       "aY 复制到行尾到a寄存器  "AY 向a增加内容
+
+   6.2.3 在多个文件间复制内容 参考4.3
+六、技巧 
+  6.1 :%s/\<four\>/4g  c替换前确认
+  6.3 排序
+      :.,/^$/-1!sort  选中当前行到下一个空行排序
+  6.4 global和move可以结合起来将所有行移到第一行前面
+      :global/^/m O
+  6.6 统计字数 g CTRL-g/G
+      :%s/write//gn 统计wirte出现的次数 参考:help count-items
+      将光标移到要参考的word 按下 K 参考帮助页 
+      :Man csh 在新打开的窗口显示帮助
+  6.7 消除空格  :%s/\s\+$//g 去掉行尾空格
+       	item	matches			equivalent ~
+	\d	digit			[0-9]
+	\D	non-digit		[^0-9]
+	\x	hex digit		[0-9a-fA-F]
+	\X	non-hex digit		[^0-9a-fA-F]
+	\s	white space		[ 	]     (<Tab> and <Space>)
+	\S	non-white characters	[^ 	]     (not <Tab> and <Space>)
+	\l	lowercase alpha		[a-z]
+	\L	non-lowercase alpha	[^a-z]
+	\u	uppercase alpha		[A-Z]
+	\U	non-uppercase alpha	[^A-Z]
+   6.8 挂起vim  CTRL+z   fg回到vim
+        !的使用
+        :!{program} 执行 {program}
+        :r !{program} 执行 {program}并读取它的输出
+        :w !{program} 执行 {program}并把当前缓冲区的内容作为它的输入
+        :[range]!{program} 以{program}过滤指定的行
+  6.9 回到上次退出的位置
+        每次退出Vim时它都会创建一个特殊的标记. 最后的一个是'0. 上次
+       的'0现在会变成'1, 原来的'1成了'2, 如此类推, 原来的'9就丢掉了
+  6.10 保存视图，恢复视图
+       mkview 保存视图  loadview 恢复视图   mkview 1 保存视图1 loadview 1 
+       mkview ~/.vim/main.vim 保存为文件  source ~/.vim/main.vim
+可在编辑别的文件是载入 
+  6.11 模式行
+
+七、查找文件
+  7.1 文件浏览
+    :edit . 编辑目录的插件 
+    说明：
+    " <enter> : 打开一个文件或目录~
+    " o : 为文件或目录打开一个新的窗口~
+    " O : 在前一个被访问过的窗口中打开指定的文件/目录
+    " p : 预览文件/目录~
+    " i : 切换大小/日期的列表显示~
+    " s : 选择一个排序键 r : 逆向排序~
+    " - : 进入父目录 c : 进入目录
+    " R : 文件重命名 D : 删除文件
+    " :help help-explorer得到更多信息~ 
+八、快速键入
+   8.1 纠错    ctrl+w 删除一个word  ctrl+u 删除光标到行首
+九、搜索与模式语音
+   9.1  set ignorecase 忽略大小写  set noignorecase 
+        set ignorecase smartcase 至少包含一个大写字母
+        \c 大小写不敏感，\C大小写敏感  (这两个选项优先级高于ingnorecase)
+   9.2  :set nowrapscan 不循环搜索 
+        /default/2 搜索到default将光标置于向下的第二行
+        /const/e  找到const将光标置于其最后一个字符上
+        /const/e+1  结尾处的下一个字符  /const/e-1  /const/b+2 b从开头偏移
+       //e 重复前一个搜索但用不同偏移  // 继续查找但移除偏移
+       反向搜索同样使用偏移 ?const?e-3
+   9.3 多次匹配 
+       /a*  *表明匹配任意次数 
+       /\(ab\)*  ab作为一个整体匹配任意次数
+       /ab\+  +至少一次    /folders\=  =0或1次
+       /ab\{3,5}  重复3-5次  
+           \{,4}  <4次
+           \{3,}  >3次
+           \{0,1} 0-1次
+           \{3}   3次
+       /end\(if\|while\|for\)   endif或endwhile或endfor
+       /"[^"]" 在[]开头用"^"可以指定匹配出[]中指定字符外的所有字符
+       /the\nword  \n匹配一个断行
+       /the\_sword  匹配空格或断行 \_s空白或断行 \_a匹配一个字母或断行
+       /"\_[^"]*" 匹配双引号引起来的字符串，即使他们跨行
+
+十、折行
+   10.1 zfap 折起一段 zf操作符命令  ap 文本对象 zo查看折叠的文本 zc再次折叠
+   10.2 zr 递归打开折行  zm递归折起折行 zR一次打开所有折行 zM关闭所有折行
+        你可以通过鼠标单"+"来打开一个折行, 单击"-"或"|"打开折叠.
+       打开所有折叠请参考|zO|.
+       关闭所有折叠请参考|zC|.
+       删除当前行的折叠请参考|zd|.
+       删除当前行的所有折叠请参考|zD|
+   10.3 :set foldclose=all 设置光标离开时折行关闭
+        :set foldcolumn=4 方便查看折行
+   10.4  根据缩进折行  :set foldmethod=indent zm,zr 来增减折叠层次
+         :set foldlevel=3 3次以上的折行都关闭
+zM将foldlevel设为0，zR将foldlevel设为最大值
+   10.5 根据语法折行参考 :help fold-syntax
+   10.6 根据表达式折行  
+
+十一、关于程序
+   11.1 ctags *.c 生成当前目录下所有C程序的tags文件
+   11.2 ctrl+]  取当前光标下的word作为tag直接跳转
+        ctrl+t 调到上一次的tag处  可带命令计数
+   11.3 代码块以{}括起来，[[到代码块的开头
+，][到它的末尾，它们都假设{和}位于第一列
+        [{跳到当前代码块的开头，它会跳过与它平级的代码块，]}会跳到当前代码块的末尾
+        光标在类内时,[m到前一个函数的开始，]m到下一个函数的末尾
+        []向后查找一个函数的末尾，]]向前查找一个函数的开始
+   11.4 括号内的移动
+        [(和)] 工作于()内部
+   11.5 查找全局标识符 光标置于要查找的标识符，按下[I 
+         [<tab> 跳到列出的选项，可加命令计数
+         [i 只列出第一个匹配的
+         ]I 只列出当前光标之后的匹配项
+         ]i 只列出当前光标之后的第一个匹配项 
+       只查找本文件的 gD，gd 查找本函数
+   11.6 filetype indent on 打开自动缩进 ，filetype indent off关闭
+     如果你只是不想对某种类型的文件使用自动缩进, 可以创建一个只包
+     含下面一行的文件:
+       ex command
+       :let b:did_indent = 1
+       现在给它起个名字保存为:
+       {directory}/indent/{filetype}.vim 
+       其中的{filetype}就是你想避免它自动缩进的文件类型, 比如"cpp"或"java".
+  11.7 :set runtimepath 显示运行目录   参考[indenting-expression]        
+  11.8 autoindent 自动缩进  smartindent 智能缩进 
+  11.9 insert模式下快速增减缩进	ctrl+t ctrl+d
+	normal模式下，可以用>> 和<< 命令来向右/左，>和<其实是操作符命令
+        >i{ 为{}内所有的行增加一个缩进  >a{也包括了{}本身
+  11.10 :set softtabstop=4 执行下面的命令，你每次按下tab键，光标向前移动4列
+        :set expandtab 使用该选项，按下tab会用空格代替
+
+十二、定义新命令
+    12.1 键映射   :map <F2> GoDate: <Esc>:read !date<CR>KJ
+	映射f2键为在文本中加日期
+	:imap  定义insert模式下的映射 可以对同一键序在不同模式映射不同的内容
+	:map Normal, Visual and Operator-pending
+	:vmap Visual
+	:nmap Normal
+	:omap Operator-pending
+	:map! Insert and Command-line
+	:imap Insert
+	:cmap Command-line
+	就是这种Vim希望继续接收命令而你又尚未键入的悬而未决
+	的状态, Vim术语里叫Operator-pending 模式.
+
+       注：使用vim的 内 置 函 数strftime, 仿上例我们可以定义这样的映射:
+	imap <F2> <C-R>=strftime("%c")<CR>. 请参考|strftime()|
+	
+    12.2 :map 列出当前定义的映射
+         :noremap 避免重映射，不去检查一个映射的内容是否包含了其它的映射
+       如果一个映射包含了自身，那么它就会不停的执行下去
+         :map ,, :s/5.1/5.2/<CR>:wnect<CR>,,	
+	:unmap Normal, Visual and Operator-pending
+	:vunmap Visual
+	:nunmap Normal
+	:ounmap Operator-pending
+	:unmap! Insert and Command-line
+	:iunmap Insert
+	:cunmap Command-line
+      有一个小技巧可以定义一个映射同时在Normal模式和Operator-pending模
+	式生效, 但却对Visual模式无效. 首先定义它对三种模式都生效 2 , 然后
+	删除它在Visual模式下的映射.
+	:map <C-A> /---><CR>
+	:vunmap <C-A>
+    12.3 特殊字符 
+          :map <Space> W 映射空格  
+          :unmap a | unmap b
+          :unmap a|unmap b 这两个是不同的命令 ，第一个映射以空格结尾
+    12.4 缩写与映射的区别  
+    12.5 自定义冒号命令
+         :command DeleteFirst 1delete 删除第一行 
+	  备注: 自定义的冒号命令必需以一个大写字母开头. 但你
+	不能使用":X", ":Next"和":Print"这些名字, 也不能使用
+	下划线! 数字是允许的, 但是不鼓励你使用.
+	:command 列出自定义命令
+      -nargs=0 没有参数
+	-nargs=1 1个参数
+	-nargs=* 任意个数的参数
+	-nargs=? 0个或1个参数
+	-nargs=+ 1个或多个参数
+      使用参数：
+         :command -nargs=+ Say :echo "<args>"
+         处理特殊字符  :command -nargs=+ Say :echo <q-args> 
+      <f-args>关键字包含的内容与<args>一样, 不过它适用于把这些参数
+	传递给一个函数调用, 如下:
+	:command -nargs=* DoIt :call AFunction(<f-args>)
+	:DoIt a b c
+	上面两个命令等同于下面的命令行:
+	:call AFunction("a", "b", "c")
+
+十三、vim脚本
+	13.6 使用函数  参考[functions]
+	    :call search("Date: ","W")
+	    函数调用可以出现在一个表达式中
+              :let line = getline(".")
+              :let repl = substitute(line, '\a', "*", "g")
+              :call setline(".", repl)
+	    

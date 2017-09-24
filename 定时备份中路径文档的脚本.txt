@@ -1,0 +1,32 @@
+#!/bin/bash
+#备份保存目录
+path=/home/bing/eft
+foder='backupOfEft'
+dir=$path/$foder
+#需要备份的目录
+backpath=/home/bing/eft/home
+#版本号
+versionNo=0
+#检查目录是否存在
+if [ ! -d $dir ]; then
+  mkdir $dir
+fi
+#进入备份目录
+cd $dir
+#如果已有备份，获取最新的版本号
+if [ ! $(ls -t|wc -l) -eq 0 ]; then
+  #获取版本号
+  versionNo=$(ls -t|head -1|awk -F'_' '{print $5}' |awk -F'.' '{print $1}')
+fi
+let versionNo=$versionNo+1
+#计算目录文件数
+filecount=$(ls |wc -l)
+#如果备份的数目>=10，删除最早的备份
+if [ $filecount -ge 10 ]; then
+  #列出文件按时间排序，取出第一行
+  rm $(ls -tr |head -1)
+
+fi
+filename=$(date +%F_%H-%M-%S_eft_backups_$versionNo.tar)
+echo $dir/$filename
+find $backpath -type f | xargs tar -Pcf $filename
